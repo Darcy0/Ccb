@@ -1,0 +1,32 @@
+# User-specific files
+*.suo
+*.sdf
+
+# User image
+*.jpg
+
+# Compressed files
+*.rar
+*.zip
+
+# Executable files
+*.exe
+
+# Compile files
+*.ilk
+*.pdb
+*.obj
+*.tlog
+*.log
+*.manifest
+*.lastbuildstate
+*.res
+*.cache
+*.exp
+*.aps
+*.pch
+
+# directory
+ipch/
+GeneratedFiles/
+output/

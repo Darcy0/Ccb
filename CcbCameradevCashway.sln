@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MfcDemo", "MfcDemo\MfcDemo.vcxproj", "{77FF63CA-D231-43B0-B6D2-B45FE873FC2F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CCB_CameraDev_cw", "CCB_CameraDev_cw\CCB_CameraDev_cw.vcxproj", "{489F835B-02A8-48FD-9D32-0A419795228B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77FF63CA-D231-43B0-B6D2-B45FE873FC2F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{77FF63CA-D231-43B0-B6D2-B45FE873FC2F}.Debug|Win32.Build.0 = Debug|Win32
+		{77FF63CA-D231-43B0-B6D2-B45FE873FC2F}.Release|Win32.ActiveCfg = Release|Win32
+		{77FF63CA-D231-43B0-B6D2-B45FE873FC2F}.Release|Win32.Build.0 = Release|Win32
+		{489F835B-02A8-48FD-9D32-0A419795228B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{489F835B-02A8-48FD-9D32-0A419795228B}.Debug|Win32.Build.0 = Debug|Win32
+		{489F835B-02A8-48FD-9D32-0A419795228B}.Release|Win32.ActiveCfg = Release|Win32
+		{489F835B-02A8-48FD-9D32-0A419795228B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
