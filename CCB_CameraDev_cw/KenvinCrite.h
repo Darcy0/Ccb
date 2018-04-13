@@ -1,3 +1,7 @@
+#ifndef __KENVINCRITE_H__
+#define __KENVINCRITE_H__
+
+
 
 class CKevinCritSec	//操作临界区
 {
@@ -38,3 +42,38 @@ public:
 protected:
 	CKevinCritSec * m_pLock;	//包含一个临界区操作对象
 };
+
+
+class CKevinMutexLock
+{
+public:
+	CKevinMutexLock(HANDLE pMutex)	
+	{
+		PrihMutex = pMutex;
+		bGetMutex = false;
+		if (WaitForSingleObject(PrihMutex, 3000) == WAIT_OBJECT_0)
+		{
+			bGetMutex = true;
+		}
+	};
+	~CKevinMutexLock()	
+	{
+		if (bGetMutex)
+		{
+			ReleaseMutex(PrihMutex);
+		}
+	};
+
+
+	bool GetLockStatus() 
+	{
+		return bGetMutex;
+	};
+
+
+protected:
+	HANDLE PrihMutex;
+	bool   bGetMutex;
+};
+
+#endif

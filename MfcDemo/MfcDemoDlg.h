@@ -15,13 +15,13 @@ typedef void(*pFunGetCameraResolutions)(char *eyed,CString &strRes);
 typedef void(*pFunSetCameraResoltuions)(char *eyed,int iWidth,int iHeight,CString fmt);  
 typedef int(*pFunGetCameraRatio_1)(char *eyed,int *w, int *h);  
 typedef void(*pFunStore_res)(int w,int h);  
-typedef int(*pFunGetRandom)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunGetMessageEx)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunWriteKey)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunInternalAuthenticate)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunExternalAuthenticate)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunImageSignature)(char* command, int clen,char *rdata, int *rlen); 
-typedef int(*pFunImageEncrypt)(char* command, int clen,char *rdata, int *rlen); 
+typedef int(*pFunGetRandom)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunGetMessageEx)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunWriteKey)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunInternalAuthenticate)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunExternalAuthenticate)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunImageSignature)(char* command, int clen,char **rdata, int *rlen); 
+typedef int(*pFunImageEncrypt)(char* command, int clen,char **rdata, int *rlen); 
 
 // CMfcDemoDlg ¶Ô»°¿ò
 class CMfcDemoDlg : public CDialogEx

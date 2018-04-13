@@ -20,6 +20,7 @@ public:
 	int _stdcall GetCameraRatio(int* w,int* h);
 	int _stdcall GetCameraFrame(BYTE* pBuf_Color,BYTE* pBuf_BW);
 	void _stdcall CameraClose();
+	static int m_hDevState;
 private:
 	vector<ELdevice> m_hDevList;
 	BYTE* pBuf_Color;
@@ -34,4 +35,5 @@ private:
 	static BOOL m_hFirstOpen;
 	HANDLE m_EventTask1;
 	HANDLE m_EventTask2;
+	
 };

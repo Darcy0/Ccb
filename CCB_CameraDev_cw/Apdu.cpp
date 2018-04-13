@@ -1679,7 +1679,7 @@ APDU_RT APDU_SM2PriKeyOperate(IN HDRIVER hToken,IN T_U32 ulFileID,IN T_U8 *pbInD
 			return RT_INVALID_PARAMETER;
 		}
 		AscToHex(szBuf,pbInData,ulInDataLen);
-		sprintf(szCommand,"80C40100%02X%04X%s",ulInDataLen,ulFileID,szBuf);
+		sprintf(szCommand,"80C4%04X%02X%s",ulFileID,szBuf);
 	}
 
 	HANDLE hMutex = APDU_BeginTransaction(hToken); if (!hMutex) return RT_UNKNOW_ERROR;
@@ -1954,7 +1954,7 @@ APDU_RT APDU_SymmetricKeyIDOperate(IN HDRIVER hToken,IN ENCRYPT_TYPE etType,IN T
 	return nSW;
 }
 
-
+#if 0
 APDU_RT APDU_WriteKey(IN HDRIVER hToken, IN T_U32 ulKeyFlags,T_BOOL endFlag, IN T_U32 ulKeyID,
 					IN T_U8* pbKey, IN T_U32 ulKeyLen)
 {	
@@ -1990,7 +1990,38 @@ APDU_RT APDU_WriteKey(IN HDRIVER hToken, IN T_U32 ulKeyFlags,T_BOOL endFlag, IN 
 
 	return nSW;
 }
+#endif
+APDU_RT APDU_WriteKey(IN HDRIVER hToken, IN T_U32 ulKeyFlags,T_BOOL endFlag, IN T_U32 ulKeyID,
+					IN T_U8* pbKey, IN T_U32 ulKeyLen)
+{
+	T_S8 szCommand[COMMAND_MAX_LEN]={0};
+	T_S8 szReply[REPLY_MAX_LEN]={0};
+	T_U16  nSW=0;
+	
+	T_S8 szBuf[1024] = {0};
+	
+	if(hToken==NULL || hToken==PARA_INVALID_HTOKEN
+		|| ulKeyID<=0 && ulKeyID>0xFF
+		|| pbKey == NULL 
+		/*|| !(ulKeyLen==8 || ulKeyLen==16) */)
+	{
+		return RT_INVALID_PARAMETER;
+	}
 
+
+	AscToHex(szBuf,pbKey,ulKeyLen);
+	
+	sprintf(szCommand,"80D4%02X%02X%02X%s",ulKeyFlags,ulKeyID,ulKeyLen,szBuf);
+
+
+	HANDLE hMutex = APDU_BeginTransaction(hToken); if (!hMutex) return RT_UNKNOW_ERROR;
+
+	SendAPDU(hToken,szCommand,szReply,&nSW);
+
+	EndTransaction(hMutex);
+
+	return nSW;
+}
 APDU_RT APDU_GenRandomNumber(IN HDRIVER hToken,IN T_U32 ulSize,OUT T_U8 *pbOutData,
 							IN OUT T_U32 *pulOutDataLen)
 {	
@@ -2061,12 +2092,13 @@ APDU_RT APDU_ExternalAuthentication(IN HDRIVER hToken,IN T_U32 ulKeyID,IN T_U8* 
 	}
 	HANDLE hMutex = APDU_BeginTransaction(hToken); if (!hMutex) return RT_UNKNOW_ERROR;
 
-	SendAPDU(hToken,"0084000008",szReply,&nSW);
+	//SendAPDU(hToken,"0084000008",szReply,&nSW);
 	
-	AscToHex(szEAKey,pbEAKey,ulEAKeyLen);
-	DES(szReply,szEAKey,TRUE,szBuf,&ulBufLen);
+	//AscToHex(szEAKey,pbEAKey,ulEAKeyLen);
+	//DES(szReply,szEAKey,TRUE,szBuf,&ulBufLen);
 
-	sprintf(szCommand,"008200%02X08%s",ulKeyID,szBuf);
+	//sprintf(szCommand,"008200%02X08%s",ulKeyID,szBuf);
+	sprintf(szCommand,"008200%02X%02X%s",ulKeyID,ulEAKeyLen,pbEAKey);
 	SendAPDU(hToken,szCommand,szReply,&nSW);
 
 	EndTransaction(hMutex);
@@ -2462,88 +2494,126 @@ APDU_RT APDU_GetSuperRight(IN HDRIVER hToken, IN T_U8* pbSuperPIN, IN T_U32 ulSu
 }
 #endif
 
-//#if 1//defCCB_CAMERADEV_API  
-// int GetRandom(char* command, int clen,char *rdata, int *rlen)
-// {
-//	 HDRIVER hToken;
-//	 return (APDU_GenRandomNumber(hToken,clen,(T_U8*)rdata,(T_U32 *)rlen));
-// }
-// int GetMessageEx(char* command, int clen,char *rdata, int *rlen)
-// {
-//	
-//	 return 0;
-// }
-//
-// int WriteKey(char* command, int clen,char *rdata, int *rlen)
-// {
-//	  HDRIVER hToken;
-//	  T_U32 ulKeyFlags = command[0];
-//	  T_BOOL endFlag = command[1]&0x01;
-//	  T_U32 ulKeyID  = command[2];
-//	  T_U32 ulKeyLen = command[3];
-//	  T_U8 pbKey[256];
-//	  memcpy(pbKey,&command[4],ulKeyLen);
-//
-//	  return (APDU_WriteKey(hToken, ulKeyFlags,endFlag,ulKeyID,pbKey,ulKeyLen));
-// }
-//
-// int InternalAuthenticate(char* command, int clen,char *rdata, int *rlen)
-// {
-//	 HDRIVER hToken;
-//	 T_U32 ulKeyID = command[0];
-//	 T_U32 ulIADataLen = command[1];
-//	 T_U8 pbIAData[256];
-//	 memcpy(pbIAData,&command[2],ulIADataLen);
-//	
-//	 return ( APDU_InternalAuthentication(hToken,ulKeyID,pbIAData,ulIADataLen,(T_U8*)rdata,(T_U32*)rlen));
-// }
-//
-// int ExternalAuthenticate(char* command, int clen,char *rdata, int *rlen)
-// {
-//	 HDRIVER hToken;
-//	 T_U32 ulKeyID = command[0];
-//	 T_U32 ulEAKeyLen = command[1];
-//	 T_U8 pbEAKey[256];
-//	 memcpy(pbEAKey,&command[2],ulEAKeyLen);
-//
-//	 return (APDU_ExternalAuthentication(hToken,ulKeyID, pbEAKey,ulEAKeyLen));
-// }
-//
-// int ImageSignature(char* command, int clen,char *rdata, int *rlen)
-// {
-//	  HDRIVER hToken;
-//	  T_U32 ulFileID = (command[1]<<8)|command[0];
-//	  T_U32 ulInDataLen =command[2];
-//	  T_U8 pbInData[512];
-//	  memcpy(pbInData,&command[3],ulInDataLen);
-//	  if(command[0] == 5)
-//	  {
-//		  //todo
-//		  return 1;
-//	  }
-//	  else if(command[0] == 6)
-//	  {
-//		  return (APDU_RSAPubKeyOperate(hToken,ulFileID,pbInData,ulInDataLen,(T_U8 *)rdata,(T_U32 *)rlen));
-//	  }
-//	  else if(command[0] == 7)
-//	  {
-//	      return (APDU_SM2PubKeyEncrypt(hToken,ulFileID,pbInData,ulInDataLen,(T_U8 *)rdata,(T_U32 *)rlen));
-//	  }
-//	  else
-//	  {
-//		  return 0xff;
-//	  }
-//
-//	 //
-// }
-//
-// int ImageEncrypt(char* command, int clen,char *rdata, int *rlen)
-// {
-//	 HDRIVER hToken;
-//	 T_U32 ulKeyID = command[0];
-//	 T_U32 ulIADataLen = command[1];
-//	 T_U8 pbIAData[256];
-//	 memcpy(pbIAData,&command[2],ulIADataLen);
-//	 return (APDU_SymmetricKeyIDOperate(hToken,ET_ENCRYPT,ulKeyID,pbIAData,ulIADataLen,(T_U8 *)rdata,(T_U32 *)rlen));
-// }
-//#endif
+#if 1//defCCB_CAMERADEV_API  
+ int GetRandom(char* command, int clen,char **rdata, int *rlen)
+ {
+	 HDRIVER hToken;
+	 *rlen = command[2];
+	 if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	 return (APDU_GenRandomNumber(hToken,command[2],(T_U8*)*rdata,(T_U32 *)rlen));
+ }
+
+ int WriteKey(char* command, int clen,char **rdata, int *rlen)
+ {
+	  HDRIVER hToken;
+	  T_U32 ulKeyFlags = command[0];
+	  T_U32 ulKeyID  = command[1];
+	  T_U32 ulKeyLen = command[2];
+	  T_U8 pbKey[256];//ID+KEY;
+	  T_S8 szMac[4];
+	  T_S32 nMacLen = sizeof(szMac);
+	  if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	  memcpy(pbKey,&command[3],ulKeyLen);
+	  memcpy(*rdata,pbKey,0x20);
+	  *rlen = 0x20;
+	  //PinToMac_SM4((unsigned char *)command,(ulKeyLen+3),szMac,&nMacLen);
+	  //memcpy(&pbKey[ulKeyLen+3],szMac,ulKeyLen);
+	  //ulKeyLen+=4;
+	  return (APDU_WriteKey(hToken, ulKeyFlags,0,ulKeyID,pbKey,ulKeyLen));
+ }
+
+ int InternalAuthenticate(char* command, int clen,char **rdata, int *rlen)
+ {
+	 HDRIVER hToken;
+	 T_U32 ulKeyID = command[1];
+	 T_U32 ulIADataLen = command[2];
+	 T_U8 pbIAData[256];
+	 if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	 memcpy(pbIAData,&command[3],ulIADataLen);
+	
+	 return ( APDU_InternalAuthentication(hToken,ulKeyID,pbIAData,ulIADataLen,(T_U8*)*rdata,(T_U32*)rlen));
+ }
+
+ int ExternalAuthenticate(char* command, int clen,char **rdata, int *rlen)
+ {
+	 HDRIVER hToken;
+	 T_U16 SW;
+	 T_U32 ulKeyID = command[1];
+	 T_U32 ulEAKeyLen = command[2];
+	 T_U8 pbEAKey[256];
+	 memcpy(pbEAKey,&command[3],ulEAKeyLen);
+	   if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	   SW = APDU_ExternalAuthentication(hToken,ulKeyID, pbEAKey,ulEAKeyLen);
+	  *rlen = 2;
+     (*rdata)[0] = SW&0xff;
+     (*rdata)[1] = (SW>>8)&0xff;
+	 return SW;
+ }
+
+ int ImageSignature(char* command, int clen,char *rdata, int *rlen)
+ {
+	  HDRIVER hToken;
+	  T_U32 ulFileID = (command[1]<<8)|command[0];
+	  T_U32 ulInDataLen =command[2];
+	  T_U8 pbInData[512];
+	  if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	  memcpy(pbInData,&command[3],ulInDataLen);
+	  if(command[0] == 5)
+	  {
+		  //todo
+		  return 1;
+	  }
+	 // else if(command[1] == 6)
+	  //{
+		  return (APDU_RSAPubKeyOperate(hToken,ulFileID,pbInData,ulInDataLen,(T_U8 *)*rdata,(T_U32 *)rlen));
+	 // }
+	  //else if(command[1] == 7)
+	  //{
+	      //return (APDU_SM2PubKeyEncrypt(hToken,ulFileID,pbInData,ulInDataLen,(T_U8 *)rdata,(T_U32 *)rlen));
+	 // }
+	 // else
+	  //{
+		//  return 0xff;
+	  //}
+
+	 //
+ }
+
+ int ImageEncrypt(char* command, int clen,char *rdata, int *rlen)
+ {
+	 HDRIVER hToken;
+	 T_U32 ulKeyID = (command[1]<<8)|command[0];
+	 T_U32 ulIADataLen = command[1];
+	 T_U8 pbIAData[256];
+	  if(clen == 0)
+	 {
+		 return 0x6a86;
+	 }
+	 memcpy(pbIAData,&command[2],ulIADataLen);
+	 
+	 return (APDU_SM2PriKeyOperate(hToken,ulKeyID,pbIAData,ulIADataLen,(T_U8 *)*rdata,(T_U32 *)rlen));
+ }
+
+
+
+
+
+#endif
+
+
+

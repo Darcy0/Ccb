@@ -15,6 +15,29 @@
 #define new DEBUG_NEW
 #endif
 
+// hex to asc: 0x22 -> "22"
+int Hex2Asc(char *Dest,char *Src,int SrcLen)
+{
+	int i;
+	for ( i = 0; i < SrcLen; i ++ )
+	{
+		sprintf(Dest + i * 2,"%02X",(unsigned char)Src[i]);
+	}
+	Dest[i * 2] = 0;
+	return TRUE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// asc to hex: "22" -> 0x22
+int Asc2Hex(char *Dest,char *Src,int SrcLen)
+{
+	int i;
+	for ( i = 0; i < SrcLen / 2; i ++ )
+	{
+		sscanf(Src + i * 2,"%02X",(unsigned char *)&Dest[i]);
+	}
+	return TRUE;
+}
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -53,10 +76,10 @@ CMfcDemoDlg::CMfcDemoDlg(CWnd* pParent /*=NULL*/)
 {
 	m_dllHandle=NULL;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_dllHandle=LoadLibrary(_T("CCB_CameraDev_cw.dll"));
+	m_dllHandle=LoadLibrary(_T("CCB_CameraDev_CW.dll"));
 	if (!m_dllHandle)
 	{
-		MessageBox(_T("提示"),_T("动态库CCB_CameraDev_cw.dll加载失败!"));
+		MessageBox(_T("提示"),_T("动态库CCB_CameraDev_CW.dll加载失败!"));
 	}
 }
 
@@ -184,16 +207,30 @@ void CMfcDemoDlg::OnBnClickedGetrandom()
 	{
 		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetRandom"),_T("End."));
 		return;
-	}
+	}	
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+	
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+	
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("GetRandom已执行,执行结果已写入文件!"),_T("提示"));
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+	
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+	
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -214,12 +251,24 @@ void CMfcDemoDlg::OnBnClickedGetmessageex()
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	
+	char buf[100];
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdata,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
 		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("GetMessageEx已执行,执行结果已写入文件!"),_T("提示"));	
+	MessageBox(buf,_T("提示"));	
+	delete rdata;
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -240,12 +289,26 @@ void CMfcDemoDlg::OnBnClickedWritekey()
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("WriteKey已执行,执行结果已写入文件!"),_T("提示"));	
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -266,12 +329,26 @@ void CMfcDemoDlg::OnBnClickedInternalauthenticate()
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("InternalAuthenticate已执行,执行结果已写入文件!"),_T("提示"));	
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -289,15 +366,37 @@ void CMfcDemoDlg::OnBnClickedExternalauthenticate()
 		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("ExternalAuthenticate"),_T("End."));
 		return;
 	}
+
+	pFunGetRandom funGetRandom=(pFunGetRandom)GetProcAddress(m_dllHandle,_T("GetRandom"));
+	if (NULL==funGetRandom)
+	{
+		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetRandom"),_T("End."));
+		return;
+	}	
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("ExternalAuthenticate已执行,执行结果已写入文件!"),_T("提示"));	
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -318,12 +417,26 @@ void CMfcDemoDlg::OnBnClickedImagesignature()
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("ImageSignature已执行,执行结果已写入文件!"),_T("提示"));	
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -344,12 +457,26 @@ void CMfcDemoDlg::OnBnClickedImageencrypt()
 	CString cmdText,clenText;
 	m_commandText.GetWindowTextA(cmdText);
 	m_clenText.GetWindowTextA(clenText);
-	char rdata[100]={0};
+	char *cCmdText=cmdText.GetBuffer(0);
+	int clen=atoi(clenText);
+
+	char *cmdBuf=new char[strlen(cCmdText)/2];
+	memset(cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
+
+	char *rdata=NULL;
 	int rlen=0;
-	int iRet=fun(cmdText.GetBuffer(0),atoi(clenText),rdata,&rlen);
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:%d\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
-	MessageBox(_T("ImageEncrypt已执行,执行结果已写入文件!"),_T("提示"));		
+	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+
+	char rdataText[100]={0};
+	Hex2Asc(rdataText,rdata,rlen);	
+
+	char buf[100]={0};
+	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
+
+	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
+		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
+	MessageBox(buf,_T("提示"));
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 

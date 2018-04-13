@@ -295,7 +295,7 @@ BOOL CBotMgr::CheckETString(char *pdevpath)
 		_tolower(*pstr ++);
 	}
 
-	pstr = strstr(chdp, "entong");
+	pstr = strstr(chdp, "cis");
 
 	if(!pstr)
 	{
@@ -413,7 +413,7 @@ DWORD   CBotMgr::GetUKList(LPGUID &lpDevGuid)
 			BotReader pTmpReader;
 			int n = vecReader.size();
 		    strcpy(pTmpReader.szDevpath,pSpDevIntfsDetData->DevicePath);
-			sprintf_s(pTmpReader.szReaderName,"Cis Ultra TrustKey %d",n);
+			sprintf_s(pTmpReader.szReaderName,"cis Ultra TrustKey %d",n);
 			pTmpReader.hToken = NULL;
 			vecReader.push_back(pTmpReader);
 		}

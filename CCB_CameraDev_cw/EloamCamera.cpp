@@ -1,12 +1,13 @@
 #include"EloamCamera.h"
 BOOL EloamCamera::m_hFirstOpen =FALSE;
-
+int EloamCamera::m_hDevState = 0;
 EloamCamera::EloamCamera()
 {
 	m_hImage1 = NULL;
 	m_hImage2 = NULL;
 	m_hScan1 = TRUE;
 	m_hScan2 = TRUE;
+
 	m_EventTask1 = CreateEvent(NULL, FALSE, FALSE, NULL);
 	m_EventTask2 = CreateEvent(NULL, FALSE, FALSE, NULL);
 	InitializeCriticalSection(&cs);
@@ -31,6 +32,7 @@ void EloamCamera::devCallback(int type, int idx, int dbt, void *param)
 	}	
 	if(1 == dbt)
 	{//设备到达
+		m_hDevState = 1;
 		LogOut.StatusOut(Info,_T("(%s) 说明:%s\r\n"),__FUNCTION__,_T("设备到达"));
 		char* name = new char[256];
 		//获取完整的设备描述
@@ -78,6 +80,10 @@ void EloamCamera::devCallback(int type, int idx, int dbt, void *param)
 			elReleaseDevice(m_this->m_hDevList[0]);
 			m_this->m_hDevList[0] = NULL;
 			m_this->m_hDevList.erase(m_this->m_hDevList.begin());
+			if(0 == m_this->m_hDevList.size())
+			{
+				elDeinitDevs();
+			}
 			LogOut.StatusOut(Info,_T("(%s) 说明:%s\r\n"),__FUNCTION__,_T("释放设备"));
 		}
 	}
@@ -143,6 +149,11 @@ int EloamCamera::OpenCamera()
 	if(elInitDevs(devCallback, this) != 0)
 	{
 		LogOut.StatusOut(Info,_T("(%s) 说明:%s %s\r\n"),__FUNCTION__,_T("设备初始化失败"),_T("End."));
+		return -1;
+	}
+	if(0 == m_hDevState)
+	{
+		LogOut.StatusOut(Info,_T("(%s) 说明:%s %s\r\n"),__FUNCTION__,_T("设备未连接"),_T("End."));
 		return -1;
 	}
 	if(m_hDevList.size()<2)

@@ -25,16 +25,16 @@ extern "C" CCB_CAMERADEV_API int GetCameraRatio_1(char *eyed,int *w, int *h);  /
 
 extern "C" CCB_CAMERADEV_API void store_res(int w,int h); //保存修改的分辨率
 
-extern "C" CCB_CAMERADEV_API int GetRandom(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int GetRandom(char* command, int clen,char **rdata, int *rlen);
 
-extern "C"CCB_CAMERADEV_API int GetMessageEx(char* command, int clen,char *rdata, int *rlen);
+extern "C"CCB_CAMERADEV_API int GetMessageEx(char* command, int clen,char **rdata, int *rlen);
 
-extern "C" CCB_CAMERADEV_API int WriteKey(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int WriteKey(char* command, int clen,char **rdata, int *rlen);
 
-extern "C" CCB_CAMERADEV_API int InternalAuthenticate(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int InternalAuthenticate(char* command, int clen,char **rdata, int *rlen);
 
-extern "C" CCB_CAMERADEV_API int ExternalAuthenticate(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int ExternalAuthenticate(char* command, int clen,char **rdata, int *rlen);
 
-extern "C" CCB_CAMERADEV_API int ImageSignature(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int ImageSignature(char* command, int clen,char **rdata, int *rlen);
 
-extern "C" CCB_CAMERADEV_API int ImageEncrypt(char* command, int clen,char *rdata, int *rlen);
+extern "C" CCB_CAMERADEV_API int ImageEncrypt(char* command, int clen,char **rdata, int *rlen);
