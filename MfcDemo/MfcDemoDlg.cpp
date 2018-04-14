@@ -238,40 +238,39 @@ void CMfcDemoDlg::OnBnClickedGetrandom()
 
 void CMfcDemoDlg::OnBnClickedGetmessageex()
 {
+
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
-	if (NULL==m_dllHandle)
+
+	pFunGetMessageEx pFun=(pFunGetMessageEx)getFunctionPointer(_T("GetMessageEx"));
+	if (NULL==pFun)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
+		LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 		return;
 	}
-	pFunGetMessageEx fun=(pFunGetMessageEx)GetProcAddress(m_dllHandle,_T("GetMessageEx"));
-	if (NULL==fun)
-	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetMessageEx"),_T("End."));
-		return;
+
+	char *cmdBuf=NULL;
+	int clen=0;
+	if (0!=getInputParam(&cmdBuf,&clen))
+	{//有参数
+		/*LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
+		return;*/
 	}
-	CString cmdText,clenText;
-	m_commandText.GetWindowTextA(cmdText);
-	m_clenText.GetWindowTextA(clenText);
-	char *cCmdText=cmdText.GetBuffer(0);
-	int clen=atoi(clenText);
 
-	char *cmdBuf=new char[strlen(cCmdText)/2];
-	memset(cmdBuf,0,strlen(cCmdText)/2);
-	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
-
-	char rdata[256];
+	char rdata[256]={0};
 	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
-	char buf[100];
-	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdata,rlen,iRet);
+	int iRet=pFun(cmdBuf,clen,&pRdata,&rlen);
+	//free(cmdBuf);//释放cmdBuf为什么会把clen也释放了。
 
-	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
-		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
+	char buf[100];
+	sprintf(buf,"输出rdata:%s, rlen:%d,返回值:0x%X",rdata,rlen,iRet);
+
+	//LogOut.StatusOut(Info,_T("(%s)  输出rdata:%s, rlen:%d,返回值:0x%X\r\n"),__FUNCTION__,rdata,rlen,iRet);
 	MessageBox(buf,_T("提示"));	
 
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
+
+
 }
 
 void CMfcDemoDlg::OnBnClickedWritekey()
@@ -490,106 +489,89 @@ void CMfcDemoDlg::OnBnClickedImageencrypt()
 void CMfcDemoDlg::OnBnClickedGetcameracode()
 {
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
-	if (NULL==m_dllHandle)
+	pFunGetCameraCode pFun= (pFunGetCameraCode)getFunctionPointer(_T("GetCameraCode"));
+	if (NULL!=pFun)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
-		return;
+		char* sRet=pFun();
+		
+		char text[100]={0};
+		sprintf(text,"CameraCode:%s",sRet);
+		MessageBox(text,_T("提示"));	
+		
+		LogOut.StatusOut(Info,_T("(%s) 摄像机编码:%s\r\n"),__FUNCTION__,sRet);
 	}
-	pFunGetCameraCode fun=(pFunGetCameraCode)GetProcAddress(m_dllHandle,_T("GetCameraCode"));
-	if (NULL==fun)
-	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetCameraCode"),_T("End."));
-		return;
-	}
-	char* sRet=fun();
-	char text[100]={0};
-	sprintf(text,"CameraCode:%s",sRet);
-	MessageBox(text,_T("提示"));	
-	LogOut.StatusOut(Info,_T("(%s) 摄像机编码:%s\r\n"),__FUNCTION__,sRet);
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
 void CMfcDemoDlg::OnBnClickedOpencamera()
 {
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
-	if (NULL==m_dllHandle)
+	pFunOpenCamera pFun=(pFunOpenCamera)getFunctionPointer(_T("OpenCamera"));
+	if (NULL!=pFun)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
-		return;
+		int iRet=pFun();
+		if (iRet>=0)
+		{
+			MessageBox(_T("摄像头打开成功!"),_T("提示"));	
+		}
+		else
+		{
+			MessageBox(_T("摄像头打开失败!"),_T("提示"));	
+		}
+		LogOut.StatusOut(Info,_T("(%s) 返回值:%d\r\n"),__FUNCTION__,iRet);
 	}
-	pFunOpenCamera fun=(pFunOpenCamera)GetProcAddress(m_dllHandle,_T("OpenCamera"));
-	if (NULL==fun)
-	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetRandom"),_T("End."));
-		return;
-	}
-	int iRet=fun();
-	if (iRet>=0)
-	{
-		MessageBox(_T("摄像头打开成功!"),_T("提示"));	
-	}
-	else
-	{
-		MessageBox(_T("摄像头打开失败!"),_T("提示"));	
-	}
-	LogOut.StatusOut(Info,_T("(%s) 返回值:%d\r\n"),__FUNCTION__,iRet);
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
 void CMfcDemoDlg::OnBnClickedGetcameraratio()
 {
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
-	if (NULL==m_dllHandle)
+	pFunGetCameraRatio pFun=(pFunGetCameraRatio)getFunctionPointer(_T("GetCameraRatio"));
+	if (NULL!=pFun)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
-		return;
+		int w=0,h=0;
+		int iRet=pFun(&w,&h);
+
+		char text[100];
+		sprintf(text,"w:%d,h:%d",w,h);
+		MessageBox(text,_T("提示"));	
+		
+		LogOut.StatusOut(Info,_T("(%s) 输出:width:%d,height:%d,返回值:%d\r\n"),__FUNCTION__,w,h,iRet);
 	}
-	pFunGetCameraRatio fun=(pFunGetCameraRatio)GetProcAddress(m_dllHandle,_T("GetCameraRatio"));
-	if (NULL==fun)
-	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetRandom"),_T("End."));
-		return;
-	}
-	int w=0,h=0;
-	int iRet=fun(&w,&h);
-	char text[100];
-	sprintf(text,"w:%d,h:%d",w,h);
-	MessageBox(text,_T("提示"));	
-	LogOut.StatusOut(Info,_T("(%s) 输出:rdata:%d,rlen:%d,返回值:%d\r\n"),__FUNCTION__,w,h,iRet);
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
 void CMfcDemoDlg::OnBnClickedGetcameraframe()
 {
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
-	if (NULL==m_dllHandle)
+	
+	pFunGetCameraRatio getCameraRatio=(pFunGetCameraRatio)getFunctionPointer(_T("GetCameraRatio"));
+	pFunGetCameraFrame getCameraFrame=(pFunGetCameraFrame)getFunctionPointer(_T("GetCameraFrame"));	
+	if (NULL==getCameraRatio||NULL==getCameraFrame)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
+		LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 		return;
 	}
-	pFunGetCameraFrame getCameraFrame=(pFunGetCameraFrame)GetProcAddress(m_dllHandle,_T("GetCameraFrame"));
-	pFunGetCameraRatio getCameraRatio=(pFunGetCameraRatio)GetProcAddress(m_dllHandle,_T("GetCameraRatio"));
-	if (NULL==getCameraFrame || NULL==getCameraRatio)
-	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s或%s加载失败 %s\r\n"),__FUNCTION__,_T("GetCameraFrame"),_T("GetCameraRatio"),_T("End."));
-		return;
-	}
-	int width,height;
+
+	int width,height;//获取图像尺寸
 	getCameraRatio(&width,&height);
 	LogOut.StatusOut(Info,_T("(%s) width:%d height:%d\r\n"),__FUNCTION__,width,height);
-	ELsize size;
-	size.width = width;
-	size.height = height;
+			
 	BYTE* pBuf_Color =  (BYTE*)malloc(width*height*3*sizeof(BYTE));
 	BYTE* pBuf_BW =(BYTE*)malloc(width*height*3*sizeof(BYTE));
 	memset(pBuf_Color,0,width*height*3);
 	memset(pBuf_BW,0,width*height*3);
+	
 	if (0 != getCameraFrame(pBuf_Color,pBuf_BW))
 	{
 		MessageBox(_T("图像帧获取失败"),_T("提示"));
 		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("图像帧获取失败"),_T("End."));
 		return;
 	}
+
+	ELsize size;
+	size.width = width;
+	size.height = height;
 	if(pBuf_Color[0] != 0)
 	{
 		ELimage image1 = elCreateImage(&size,3,pBuf_Color,width*3,EL_CREATE_TOP_LEFT);
@@ -606,7 +588,6 @@ void CMfcDemoDlg::OnBnClickedGetcameraframe()
 	}
 	if(pBuf_BW[0] !=0)
 	{
-
 		ELimage image2 = elCreateImage(&size,3,pBuf_BW,width*3,EL_CREATE_TOP_LEFT);
 		if (NULL==image2)
 		{
@@ -630,18 +611,63 @@ void CMfcDemoDlg::OnBnClickedGetcameraframe()
 void CMfcDemoDlg::OnBnClickedCameraclose()
 {
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
+	pFunCameraClose pFun=(pFunCameraClose)getFunctionPointer(_T("CameraClose"));
+	if (NULL!=pFun)
+	{
+		pFun();
+		MessageBox(_T("CameraClose已执行"),_T("提示"));	
+	}	
+	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
+}
+
+void * CMfcDemoDlg::getFunctionPointer( const char* funName )
+{
+	LogOut.StatusOut(Info,_T("(%s) %s\r\n"),__FUNCTION__,_T("Start..."));
+	if (NULL==funName)
+	{
+		LogOut.StatusOut(Error,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("传入函数名为空."),_T("End."));
+		return NULL;
+	}
 	if (NULL==m_dllHandle)
 	{
-		LogOut.StatusOut(Info,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_cw.dll动态库加载失败"),_T("End."));
-		return;
+		LogOut.StatusOut(Error,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("CCB_CameraDev_CW.dll动态库加载失败"),_T("End."));
+		return NULL;
 	}
-	pFunCameraClose fun=(pFunCameraClose)GetProcAddress(m_dllHandle,_T("CameraClose"));
-	if (NULL==fun)
+	void* pFun=(void *)GetProcAddress(m_dllHandle,funName);
+	if (NULL==pFun)
+	{//函数指针获取失败
+		LogOut.StatusOut(Error,_T("(%s) 函数%s加载失败\r\n"),__FUNCTION__,funName);
+	}
+	else
+	{//函数指针获取成功
+		LogOut.StatusOut(Info,_T("(%s) 函数%s加载成功\r\n"),__FUNCTION__,funName);
+	}
+	LogOut.StatusOut(Info,_T("(%s) %s\r\n"),__FUNCTION__,_T("End."));
+	return pFun;
+}
+
+int CMfcDemoDlg::getInputParam( char **cmdBuf,int* len )
+{
+	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("Start..."));
+	CString cmdText,clenText;
+	
+	m_commandText.GetWindowTextA(cmdText);
+	m_clenText.GetWindowTextA(clenText);
+	if (cmdText.IsEmpty()||clenText.IsEmpty())
 	{
-		LogOut.StatusOut(Info,_T("(%s) 函数%s加载失败 %s\r\n"),__FUNCTION__,_T("GetRandom"),_T("End."));
-		return;
+		LogOut.StatusOut(Error,_T("(%s) %s %s\r\n"),__FUNCTION__,_T("没有输入参数"),_T("End."));
+		return -1;
 	}
-	fun();
-	MessageBox(_T("CameraClose已执行"),_T("提示"));	
-	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
+
+	char *cCmdText=cmdText.GetBuffer(0);
+	*cmdBuf=(char *)malloc(strlen(cCmdText)/2);
+
+	memset(*cmdBuf,0,strlen(cCmdText)/2);
+	Asc2Hex(*cmdBuf,cCmdText,strlen(cCmdText));
+
+	*len=atoi(clenText);
+
+	LogOut.StatusOut(Info,_T("(%s) command:%s,clen:%d\r\n"),__FUNCTION__,cCmdText,*len);
+	LogOut.StatusOut(Info,_T("(%s) %s\r\n"),__FUNCTION__,_T("End."));
+	return 0;
 }

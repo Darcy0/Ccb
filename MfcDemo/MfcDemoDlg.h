@@ -16,7 +16,7 @@ typedef void(*pFunSetCameraResoltuions)(char *eyed,int iWidth,int iHeight,CStrin
 typedef int(*pFunGetCameraRatio_1)(char *eyed,int *w, int *h);  
 typedef void(*pFunStore_res)(int w,int h);  
 typedef int(*pFunGetRandom)(char* command, int clen,char **rdata, int *rlen); 
-typedef  int (__stdcall *pFunGetMessageEx)(char* command, int clen,char **rdata, int *rlen); 
+typedef int (*pFunGetMessageEx)(char* command, int clen,char **rdata, int *rlen); 
 typedef int(*pFunWriteKey)(char* command, int clen,char **rdata, int *rlen); 
 typedef int(*pFunInternalAuthenticate)(char* command, int clen,char **rdata, int *rlen); 
 typedef int(*pFunExternalAuthenticate)(char* command, int clen,char **rdata, int *rlen); 
@@ -46,6 +46,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+
 public:
 	afx_msg void OnBnClickedGetrandom();
 	afx_msg void OnBnClickedGetmessageex();
@@ -54,8 +55,12 @@ public:
 	afx_msg void OnBnClickedExternalauthenticate();
 	afx_msg void OnBnClickedImagesignature();
 	afx_msg void OnBnClickedImageencrypt();
+
 private:
 	HINSTANCE m_dllHandle;
+
+	void* getFunctionPointer(const char* funName);
+	int getInputParam(char **cmdBuf,int* len);
 public:
 	CEdit m_commandText;
 	CEdit m_clenText;
