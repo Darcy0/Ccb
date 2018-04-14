@@ -27,7 +27,7 @@ extern "C" CCB_CAMERADEV_API void store_res(int w,int h); //保存修改的分辨率
 
 extern "C" CCB_CAMERADEV_API int GetRandom(char* command, int clen,char **rdata, int *rlen);
 
-extern "C"CCB_CAMERADEV_API int GetMessageEx(char* command, int clen,char **rdata, int *rlen);
+extern "C" /*CCB_CAMERADEV_API*/ int __stdcall GetMessageEx(char* command, int clen,char **rdata, int *rlen);
 
 extern "C" CCB_CAMERADEV_API int WriteKey(char* command, int clen,char **rdata, int *rlen);
 

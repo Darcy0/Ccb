@@ -218,19 +218,21 @@ void CMfcDemoDlg::OnBnClickedGetrandom()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 	
-	char *rdata=NULL;
+	char rdata[16];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 	
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
-	
+
 	char buf[100]={0};
 	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdataText,rlen,iRet);
 	
 	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
 		__FUNCTION__,cmdText,clen,rdataText,rlen,iRet);
 	MessageBox(buf,_T("提示"));
+
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -258,17 +260,17 @@ void CMfcDemoDlg::OnBnClickedGetmessageex()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
-	
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 	char buf[100];
 	sprintf(buf,"输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X",cmdText,clen,rdata,rlen,iRet);
 
 	LogOut.StatusOut(Info,_T("(%s)  输入:command:%s,clen:%d,输出:rdata:%s,rlen:%d,返回值:0x%X\r\n"),
 		__FUNCTION__,cmdText,atoi(clenText),rdata,rlen,iRet);
 	MessageBox(buf,_T("提示"));	
-	delete rdata;
+
 	LogOut.StatusOut(Info,_T("(%s)  %s\r\n"),__FUNCTION__,_T("End."));
 }
 
@@ -296,9 +298,10 @@ void CMfcDemoDlg::OnBnClickedWritekey()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
@@ -336,9 +339,10 @@ void CMfcDemoDlg::OnBnClickedInternalauthenticate()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
@@ -384,9 +388,10 @@ void CMfcDemoDlg::OnBnClickedExternalauthenticate()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
@@ -424,9 +429,10 @@ void CMfcDemoDlg::OnBnClickedImagesignature()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
@@ -464,9 +470,10 @@ void CMfcDemoDlg::OnBnClickedImageencrypt()
 	memset(cmdBuf,0,strlen(cCmdText)/2);
 	Asc2Hex(cmdBuf,cCmdText,strlen(cCmdText));
 
-	char *rdata=NULL;
+	char rdata[256];
+	char *pRdata=rdata;
 	int rlen=0;
-	int iRet=fun(cmdBuf,clen,&rdata,&rlen);
+	int iRet=fun(cmdBuf,clen,&pRdata,&rlen);
 
 	char rdataText[100]={0};
 	Hex2Asc(rdataText,rdata,rlen);	
